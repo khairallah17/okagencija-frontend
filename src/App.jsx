@@ -36,7 +36,7 @@ function App() {
 
           <Route path="" element={<Login/>} />
 
-          <Route element={<LoginPrivateRoutes/>}>
+          {/* <Route element={<LoginPrivateRoutes/>}> */}
             <Route exact path="/">
               <Route path='home' element={<Home/>} />
               <Route path="deposit" element={<Deposit/>} />
@@ -57,7 +57,7 @@ function App() {
               <Route path='portfolio' element={<AdminPortfolio/>} />
               <Route path='tools' element={<AdminTools/>} />
             </Route>
-          </Route>
+          {/* </Route> */}
 
         </Routes>
       </UserProvider>

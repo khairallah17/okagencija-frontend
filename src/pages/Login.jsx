@@ -9,7 +9,11 @@ const Login = () => {
 
     const navigate = useNavigate({})
 
-    const { handleLogin } = useUserContext()
+    // const { handleLogin } = useUserContext()
+
+    const handleLogin = ( ) => {
+        navigate("/home")
+    }
 
   return (
     <div className="flex items-center justify-center h-screen flex-col gap-5">
