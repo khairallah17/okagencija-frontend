@@ -12,7 +12,7 @@ const Login = () => {
     // const { handleLogin } = useUserContext()
 
     const handleLogin = ( ) => {
-        navigate("/home")
+        navigate("/admin")
     }
 
   return (
