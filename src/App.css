@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;900&display=swap');
+
+@tailwind base;
+@tailwind utilities;
+@tailwind components;
+
+@layer base{
+    *{
+        @apply font-roboto;
+    }
+
+    body{
+        @apply bg-gray-200;
+        @apply h-screen;
+    }
+
+    #root, #root > div{
+        @apply h-full;
+    }
+
+    .active > div > .icon{
+        @apply bg-black rounded-lg drop-shadow-xl;
+    }
+
+    .active > div > .icon > svg{
+        @apply text-white !important;
+    }
+
+    table, th {
+        @apply border;
+        @apply border-black;
+    }
+    
+    table, th, td {
+        @apply border-collapse;
+        @apply text-left;
+    }
+
+    th, td{
+        @apply p-3;
+        @apply w-32;
+    }
+
+    th{
+        @apply text-white;
+        @apply bg-slate-800;
+    }
+
+}
