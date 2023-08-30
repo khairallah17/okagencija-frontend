@@ -3,6 +3,8 @@ import FormInputs from './FormInputs'
 import useFormContext from '../../Hooks/useFormContext'
 import { ChevronRightIcon } from "@heroicons/react/24/outline"
 import toast ,{ Toaster } from 'react-hot-toast'
+import useUserContext from '../../Hooks/useUserContext'
+import jwtDecode from 'jwt-decode'
 
 const notifySuccess = () => toast.success('Added Successfully')
 
@@ -13,7 +15,8 @@ const Form = () => {
         setPage,
         data,
         title,
-        canSubmit
+        canSubmit,
+        registerRefferal
     } = useFormContext()
 
     const handlePrevious = () => {
@@ -71,7 +74,7 @@ const Form = () => {
                     Previous
                 </button>
 
-                <button type="button" className={`btn bg-indigo-800 hover:bg-indigo-700 duration-200 text-white p-3 px-5 gap-2 ${page == 0 ? "hidden" : "flex"}`} onClick={notifySuccess} >Submit</button>
+                <button type="button" className={`btn bg-indigo-800 hover:bg-indigo-700 duration-200 text-white p-3 px-5 gap-2 ${page == 0 ? "hidden" : "flex"}`} onClick={registerRefferal} >Submit</button>
                 <Toaster  
                     position="bottom-right"
                     reverseOrder={false}

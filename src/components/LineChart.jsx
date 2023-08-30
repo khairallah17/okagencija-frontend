@@ -6,22 +6,24 @@ ChartJS.register(
     Title, Tooltip, LineElement, Legend, CategoryScale, LinearScale, PointElement
 )
 
-const LineChart = () => {
+const LineChart = ({capital_profit}) => {
 
+    const capital = capital_profit.map(({ capital }) => capital)
+    const profit = capital_profit.map(({ profit }) => profit)
 
     const data = {
-        labels: ["jan 21","fev 21","mar 21", "apr 21","may 21","jun 21","jul 21"],
+        labels: ["jan","fev","mar", "apr","may","jun","jul","aug", "sep", "oct", "nov", "dec"],
         datasets: [
             {
                 label: 'capital',
-                data: [28, 28, 65, 65, 65, 65, 65],
+                data: capital,
                 fill: false,
                 borderColor: '#65CB49',
                 tension: 0.1
             },
             {
                 label: 'profit',
-                data: [28, 32, 29, 65, 60, 70, 100],
+                data: profit,
                 fill: false,
                 borderColor: '#439FE3',
                 tension: 0.1
@@ -29,20 +31,9 @@ const LineChart = () => {
         ]
     };
 
-    const config = {
-        type: 'line',
-        data: data,
-    };
-
-    const style = {
-        width: "300",
-        height: "300"
-    }
  
     return (
-        // <div style={{width:'500px',height:'500px'}}>
-            <Line data={data}/>
-        /* </div> */
+        <Line data={data}/>
   )
 }
 

@@ -47,4 +47,8 @@
         @apply bg-slate-800;
     }
 
+    .news-card{
+        @apply overflow-y-scroll;
+    }
+
 }

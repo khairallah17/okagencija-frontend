@@ -1,7 +1,9 @@
-import React, { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Layout from '../components/Layout'
 import { Link } from 'react-router-dom'
 import Modal from '../components/Modal'
+import axios from 'axios'
+import jwtDecode from 'jwt-decode'
 
 import {
   BanknotesIcon,
@@ -12,14 +14,94 @@ import {
   TrashIcon
 } from "@heroicons/react/24/outline"
 
-const cards = [{ icon: <BanknotesIcon className="h-6 w-6 text-black" />, text: "commission earned", class: "bg-[#58C2D8]", textColor: "text-[#58C2D8]", shadow:"shadow-[#58C2D8]" },
-               { icon: <CreditCardIcon className="h-6 w-6 text-black" />, text: "deposit", class: "bg-[#69A4FB]", textColor: "text-[#69A4FB]", shadow:"shadow-[#69A4FB]" },
-               { icon: <ClockIcon className="h-6 w-6 text-black" />, text: "payout", class: "bg-[#EC68FD]", textColor: "text-[#EC68FD]", shadow:"shadow-[#EC68FD]" },
-               { icon: <WalletIcon className="h-6 w-6 text-black" />, text: "sales manager", class: "bg-[#DA3134]", textColor: "text-[#DA3134]", shadow:"shadow-[#DA3134]" }]
-
 const Home = () => {
 
   const [open, setOpen] = useState(false)
+  const [depositSum, setDepositSum] = useState(0)
+  const [payoutSum, setPayoutSum] = useState(0)
+  const [news, setNews] = useState([])
+  const [clientInfo, setClientInfo] = useState([])
+  const [comissionEarned, setComissionEarned] = useState(0)
+  const [revenueShare, setRevenueShare] = useState(0)
+
+  const clientid = jwtDecode(localStorage.getItem("token")).clientId
+
+  const cards = [{ icon: <BanknotesIcon className="h-6 w-6 text-black" />, text: "commission earned", class: "bg-[#58C2D8]", textColor: "text-[#58C2D8]", shadow:"shadow-[#58C2D8]", sum: comissionEarned },
+                 { icon: <CreditCardIcon className="h-6 w-6 text-black" />, text: "deposit", class: "bg-[#69A4FB]", textColor: "text-[#69A4FB]", shadow:"shadow-[#69A4FB]", sum: depositSum },
+                 { icon: <ClockIcon className="h-6 w-6 text-black" />, text: "payout", class: "bg-[#EC68FD]", textColor: "text-[#EC68FD]", shadow:"shadow-[#EC68FD]", sum: payoutSum },
+                 { icon: <WalletIcon className="h-6 w-6 text-black" />, text: "Revenue Share", class: "bg-[#DA3134]", textColor: "text-[#DA3134]", shadow:"shadow-[#DA3134]", sum: revenueShare }]
+
+
+  useEffect(() => {
+
+    const getDepositSum = async () => {
+
+      try {
+
+        const depositsSum = await axios.get(import.meta.env.VITE_API+`/api/v1/client/deposits/sum?clientid=${clientid}`)
+        const sum = await depositsSum.data.depositSum || 0
+
+        setDepositSum(sum)  
+
+      } catch (err) {
+        console.log(err.message)
+      }
+
+    }
+
+    const getPayoutSum = async () => {
+
+      try{
+
+        const payoutssum = await axios.get(import.meta.env.VITE_API+`/api/v1/client/payouts/sum?clientid=${clientid}`)
+        const sum = payoutssum.data.payoutSum || 0
+
+        setPayoutSum(sum)
+
+      } catch (err) {
+        console.log(err.message)
+      }
+
+    }
+
+    const getNews = async () => {
+
+      try {
+        
+        const response = await axios.get(import.meta.env.VITE_API+`/api/v1/admin/news`)
+        const data = await response.data.news
+
+        setNews(data)
+
+      } catch (err) {
+        console.log(err.message)
+      }
+
+    }
+
+    const getUserById = async () => {
+
+      try {
+
+        const { data } = await axios.get(import.meta.env.VITE_API+`/api/v1/admin/users/${clientid}`)
+        setClientInfo(data.userInfo[0])
+
+        setRevenueShare(data.userInfo[0].revenue_share || 0)
+        setComissionEarned(data.userInfo[0].comission_earned || "0%")
+
+
+      } catch (err) {
+        console.log(err.message)
+      }
+
+    }
+
+    getDepositSum()
+    getPayoutSum()
+    getNews()
+    getUserById()
+
+  }, [])
 
   return (
     <Layout>
@@ -42,8 +124,8 @@ const Home = () => {
 
           <div className="profile-text flex flex-col gap-3 items-center">
 
-            <p className='uppercase'>inf00123</p>
-            <p>miguel82@hotmail.com</p>
+            <p className='uppercase'>{clientInfo?.username}</p>
+            <p>{clientInfo?.email}</p>
 
             <Link to="/changePassword" className='w-full capitalize text-violet-500 text-center bg-gray-200 border border-gray-300 p-2'>
               change password
@@ -70,7 +152,7 @@ const Home = () => {
           <div className="info-personal flex items-center gap-5 p-5 border-r-2 flex-grow">
             <img src="/user.png" alt="" className='w-32 h-32' />
             <div className="info-text flex flex-col items-start gap-2">
-              <h3 className=' font-bold' >Member1 Test</h3>
+              <h3 className=' font-bold' >{clientInfo?.username}</h3>
               <p className=' text-gray-400 font-light' >INF00123</p>
               <Link to="/home" className='text-gray-400 border border-gray-400 py-1 px-3 rounded-3xl hover:bg-gray-400 hover:text-white duration-200' onClick={() => setOpen(true)}>view profile</Link>
             </div>
@@ -88,7 +170,7 @@ const Home = () => {
               <div key={element.text} className="card flex justify-between flex-col gap-4 bg-white rounded-xl p-5 w-60 h-52 relative overflow-hidden">
                 <div className={`p-3 rounded-lg ${element.class} w-fit shadow-2xl ${element.shadow}`}>{element.icon}</div>
                 <p className=' capitalize'>{ element.text }</p>
-                <p className={element.textColor} >$0</p>
+                <p className={element.textColor} >{element.sum}{element.text == "Revenue Share" ? "" : "$"}</p>
                 <div className={`absolute content w-44 h-44 ${element.class} bottom-[-50%] right-[-30%] rounded-full opacity-20`}></div>
               </div>
             ))
@@ -99,8 +181,23 @@ const Home = () => {
               </div>
         </div>
 
-          <div className="news flex bg-white mt-10 h-64 rounded-lg p-5">
+          <div className="news flex flex-col gap-3 bg-white mt-10 h-[500px] max-w-full overflow-scroll rounded-lg p-5">
             <h1>News</h1>
+            <div className="flex gap-4">
+              {
+
+                news.map(({title, content, image}, key) => (
+                  <div key={key} className="cursor-pointer news-card overflow-y-scroll bg-white rounded-lg max-w-64 max-h-96 min-w-64 min-h-max-h-96 h-96 w-64 overflow-clip">
+                    <img src={import.meta.env.VITE_API+image} className='w-64' alt="" />
+                    <div className="content p-4">
+                        <h1 className='font-bold text-xl'>{title}</h1>
+                        <p>{content}</p>    
+                    </div>
+                  </div>
+                ))
+
+              }
+            </div>
           </div>
 
     </Layout>

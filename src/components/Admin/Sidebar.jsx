@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { 
     RectangleGroupIcon, 
@@ -8,14 +8,21 @@ import {
     Cog6ToothIcon,
     ReceiptPercentIcon
 } from "@heroicons/react/24/outline"
+import { FiUsers, FiUpload } from "react-icons/fi"
+import { BsNewspaper } from "react-icons/bs"
+import { TbReportSearch } from "react-icons/tb"
 
 const sideMenu = [
-    { to: "/admin", icon: <RectangleGroupIcon className="h-6 w-6 text-black" />, addIcon: "", text: "dashboard", active: true, list: [] },
-    { to: "/admin/commission", icon: <ReceiptPercentIcon className="h-6 w-6 text-black" />, addIcon: "", text: "commissions", active: false, list:[]},
-    { to: "/admin/payout", icon: <CurrencyDollarIcon className="h-6 w-6 text-black" />, addIcon: "", text: "payout", active: false, list: [] },
-    { to: "/admin/deposit", icon: <FlagIcon className="h-6 w-6 text-black" />, addIcon: "", text: "deposit", active: false, list: [] },
-    { to: "/admin/portfolio", icon: <ChartPieIcon className="h-6 w-6 text-black" />, addIcon: "", text: "portfolio", active: false, list: [] },
-    { to: "/admin/tools", icon: <Cog6ToothIcon className="h-6 w-6 text-black" />, addIcon: "" , text: "tools", active: false, list: [] }
+    { to: "/admin", icon: <RectangleGroupIcon className="h-6 w-6 text-black" />, text: "dashboard", active: true },
+    { to: "/admin/commission", icon: <ReceiptPercentIcon className="h-6 w-6 text-black" />, text: "commissions", active: false },
+    { to: "/admin/payout", icon: <CurrencyDollarIcon className="h-6 w-6 text-black" />, text: "payout", active: false },
+    { to: "/admin/deposit", icon: <FlagIcon className="h-6 w-6 text-black" />, text: "deposit", active: false },
+    { to: "/admin/portfolio", icon: <ChartPieIcon className="h-6 w-6 text-black" />, text: "portfolio", active: false },
+    { to: "/admin/reports", icon: <TbReportSearch className='h-6 w-6 text-black' />, text: "reports", active: false },
+    // { to: "/admin/tools", icon: <Cog6ToothIcon className="h-6 w-6 text-black" />, text: "tools", active: false },
+    { to: "/admin/clients", icon: <FiUsers className="h-6 w-6 text-black" />, text: "clients", active: false },
+    { to: "/admin/news", icon: <BsNewspaper className="h-6 w-6 text-black" />, text: "news", active: false },
+    { to: "/admin/files", icon: <FiUpload className='h-6 w-6 text-black' />, text: "upload files", active: false }
 ]
 
 const Sidebar = () => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Layout from '../components/Layout'
 import { Link } from 'react-router-dom'
 import Modal from '../components/Modal'
@@ -6,16 +6,22 @@ import toast, { Toaster } from 'react-hot-toast'
 import { BanknotesIcon, CheckIcon, WalletIcon } from "@heroicons/react/24/outline";
 import crypto from "../../public/crypto.jpg"
 import bankTransfer from "../../public/bankTransfer.jpg"
+import creditCard from "../../public/credit-card.png"
+import jwtDecode from 'jwt-decode'
+import axios from 'axios'
 
 const depostis = [
                   { text: "Conservative", price: "", border: "border-[#ABBAE3]" },
                   { text: "Moderate", price: "", border: "border-[#607269]" },
                   { text: "Aggressive", price: "", border: "border-[#C3C573]" },]
 
-const cryptos = [
-                    {coin:"USDT", price: 1 },
-                    {coin: "BTC" , price: 28746.40},
-                    {coin: "ETH" , price: 1957.23}]
+const cryptos = [{coin:"USDT", price: 1 },
+                 {coin: "BTC" , price: 28746.40},
+                 {coin: "ETH" , price: 1957.23}]
+
+const payments = [{ type: "crypto", image: crypto },
+                 { type: "bank transfer", image: bankTransfer },
+                 { type: "credit card", image: creditCard }]
 
 
 const Deposit = () => {
@@ -23,18 +29,69 @@ const Deposit = () => {
     const [addDeposit, setAddDeposit] = useState([])
     const [open, setOpen] = useState(false)
     const [activeCrypto, setACtiveCrypto] = useState("USDT")
-    const [price, setPrice] = useState(1)
+    const [priceValue, setPriceValue] = useState(1)
     const [value, setValue] = useState(0)
     const [wallet, setWallet] = useState("")
     const [terms, setTerms] = useState(false)
+    const [image, setImage] = useState(crypto)
+    const [name, setName] = useState("")
 
     const [payment, setPayment] = useState("crypto")
+
+    const [prices, setPrices] = useState([{type:"USDT", price: 1 },
+                                          {type: "BTC" , price: 28746.40},
+                                          {type: "ETH" , price: 1957.23}])
+
+    const [clientId, setClientId] = useState(jwtDecode(localStorage.getItem("token")).clientId)
+
+    const [deposits, setDeposits] = useState([])
+
+    useEffect(() => {
+
+        const retreiveDeposits = async () => {
+
+            try {
+                
+                const response = await axios.get(import.meta.env.VITE_API+`/api/v1/client/deposits?clientid=${clientId}`)
+                const data = await response.data.deposits
+
+                setDeposits(data)
+
+            } catch (error) {
+                console.log(error.message)
+            }
+
+        }
+
+        retreiveDeposits()
+        
+    }, [])
     
-    const submitClick = () => {
-        if (wallet.length > 5)
-            toast.success('Email was Sent!!')
-        else if (!terms)
-            toast.error("please check terms and conditions !")
+    const submitClick = async () => {
+        if (!terms)
+            return toast.error("please check terms and conditions !")
+
+
+
+        if (wallet.length > 5){
+
+            try{
+
+                const response = await axios.post(import.meta.env.VITE_API+`/api/v1/client/deposits`, {
+                    clientId: clientId,
+                    depositAmount: priceValue,
+                    depositMoneyTransferType: activeCrypto,
+                    depositMoneyCurrencie: payment,
+                    depositName: addDeposit[0].text,
+                    depositWallet: wallet
+                })
+
+                return toast.success('Email was Sent!!')
+
+            } catch(err) {
+                console.log(err.message)
+            }
+        }
         else
             toast.error("Wallet invalid !!")
     }
@@ -56,12 +113,29 @@ const Deposit = () => {
 
     const setActiveCoinAndPrice = (e) => {
         setACtiveCrypto(e.target.value)
-        setPrice(e.target.options[e.target.selectedIndex].attributes[0].value)
     }
 
     const handleBankTransfer = () => {
         setPayment("bank transfer")
         setACtiveCrypto("$")
+        setPrices([{type:"SEPA Transfer", price: 1}])
+        setImage(bankTransfer)
+    }
+
+    const handleCryptoClick = () => {
+        setPayment("crypto currencie")
+        setACtiveCrypto("USDT")
+        setPrices([{type:"USDT", price: 1 },
+        {type: "BTC" , price: 28746.40},
+        {type: "ETH" , price: 1957.23}])
+        setImage(crypto)
+    }
+
+    const handleCreditCard = () => {
+        setPayment("credit card")
+        setACtiveCrypto("$")
+        setPrices([{type: "credit card", price: 1}])
+        setImage(creditCard)
     }
 
 
@@ -90,17 +164,21 @@ const Deposit = () => {
                                 <div className=" crypto-inputs flex flex-col gap-3">
 
                                     <div className="image-crypto flex items-center justify-center my-5">
-                                        <img src={payment == "crypto" ? crypto : bankTransfer} alt="" className=' w-52'/>
+                                        <img src={image} alt="" className=' w-52'/>
                                     </div>
 
                                     <div className="select-payment flex items-center justify-around">
 
                                         <div className="crypto flex items-center gap-1">
-                                            <input onClick={() => setPayment("crypto")} type="button" className='p-2 px-4 bg-violet-700 rounded-lg text-white cursor-pointer' name="crypto" id="" value="crypto" />
+                                            <input onClick={handleCryptoClick} type="button" className='p-2 px-4 bg-violet-700 rounded-lg text-white cursor-pointer' name="crypto" id="" value="crypto" />
                                         </div>
 
                                         <div className="bank-transfer flex items-center gap-1">
                                             <input onClick={handleBankTransfer} type="button" className='p-2 px-4 bg-violet-700 rounded-lg text-white cursor-pointer' name="Bank transfer" id="" value="bank transfer" />
+                                        </div>
+
+                                        <div className="credi-card flex items-center gap-1">
+                                            <input onClick={handleCreditCard} type="button" className='p-2 px-4 bg-violet-700 rounded-lg text-white cursor-pointer' name="credit card" id="" value="credit card" />
                                         </div>
 
                                     </div>
@@ -111,9 +189,12 @@ const Deposit = () => {
                                         </div>
                                         <select name="crypto" className='flex-grow bg-transparent px-5' onChange={(e) => setActiveCoinAndPrice(e)}>
                                             {
-                                                payment == "bank transfer" ? <option value="SEPA Transfer">SEPA Transfer</option> : cryptos.map(crypto => (
-                                                    <option key={crypto.coin} price={crypto.price} value={crypto.coin}>{crypto.coin}</option>
-                                                ))
+                                                // payment == "bank transfer" ? <option value="SEPA Transfer">SEPA Transfer</option> : cryptos.map(crypto => (
+                                                //     <option key={crypto.coin} price={crypto.price} value={crypto.coin}>{crypto.coin}</option>
+                                                // ))
+                                                prices.map(({type, price}, key) => (
+                                                        <option key={key} price={price} value={type}>{type}</option>
+                                                    ))
                                             }
                                         </select>
                                         <div className="check-icon bg-[#665BAF] duration-200 hover:bg-[#584bad] p-1 px-2 cursor-pointer rounded-r-md">
@@ -126,7 +207,7 @@ const Deposit = () => {
                                             <BanknotesIcon className="h-6 w-6 text-white" />
                                         </div>
                                         <div className="crypto-price flex-grow flex items-center justify-center">
-                                            <input type="text" value={`${parseInt(value) / price} ${activeCrypto}`} disabled={true} className="text-center text-gray-400" />
+                                            <input type="text" value={priceValue} onChange={(e) => setPriceValue(e.target.value)} className="w-full outline-none p-1 px-5" />
                                         </div>
                                         <div className="check-icon bg-[#665BAF] duration-200 hover:bg-[#584bad] p-1 px-2 cursor-pointer rounded-r-md">
                                             <CheckIcon className="h-6 w-6 text-white" />
@@ -162,27 +243,27 @@ const Deposit = () => {
                 }
             </div>
 
-            <p>The values of packages are just informative. Use this packages if you start portfolio or add a value to your initial starting deposit</p>
+            <p>choose between different options</p>
 
         </div>
 
         <div className="deposits-table bg-white p-10 rounded-2xl mb-8">
-            <table>
+            <table className=' table-auto w-full'>
                 <thead>
                     <tr>
                         <th> Details</th>
-                        <th> VALUE </th>
-                        <th> DATE </th>
+                        <th> Value </th>
+                        <th> Date </th>
                     </tr>
                 </thead>
                 <tbody>
                         {
-                            addDeposit.map(({ text, price, date, key }) => {
+                            deposits.map(({ deposit_name, deposit_amount, deposit_date }, key) => {
                                 return (
                                     <tr key={ key }>
-                                        <td>{ text }</td>
-                                        <td>{ price }</td>
-                                        <td>{ date }</td>
+                                        <td>{ deposit_name }</td>
+                                        <td>{ deposit_amount }</td>
+                                        <td>{ deposit_date.split("T")[0] }</td>
                                     </tr>
                                 )
                             })

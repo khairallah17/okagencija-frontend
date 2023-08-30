@@ -1,13 +1,38 @@
-import React,{ useState } from 'react'
+import { useState, useEffect } from 'react'
 import Layout from '../components/Layout'
 import { Link } from 'react-router-dom'
 import toast, { Toaster } from 'react-hot-toast'
+import jwtDecode from 'jwt-decode'
+import axios from 'axios'
 
 const Payout = () => {
+
+    const [payouts, setPayouts] = useState([])
+    const [clientId, setClientId] = useState(jwtDecode(localStorage.getItem("token")).clientId)
 
     const handleClickPayout = () => {
         toast.success("email was sent to the BackOffice!")
     }
+
+    useEffect(() => {
+
+        const retreivePayouts = async () => {
+
+            try {
+
+                const { data } = await axios.get(`${import.meta.env.VITE_API}/api/v1/client/payouts/${clientId}`)
+
+                setPayouts(data.payouts)
+
+            } catch (err) {
+                console.log(err.message)
+            }
+
+        }
+
+        retreivePayouts()
+
+    }, [])
 
   return (
     <Layout>
@@ -33,7 +58,7 @@ const Payout = () => {
 
         <div className="deposits-table bg-white p-10 rounded-2xl mb-8">
             <div className="withdrawal-table">
-                <table>
+                <table className='table w-full'>
                     <thead>
                         <tr>
                             <th> Details</th>
@@ -43,11 +68,15 @@ const Payout = () => {
                     </thead>
                     <tbody>
 
-                        <tr>
-                            <td>withdrawal </td>
-                            <td>2,500 $</td>
-                            <td>2023-03-28</td>
-                        </tr>
+                    {
+                        payouts.map(({payout_detail, payout_value, payout_date}, key) => (
+                            <tr key={key}>
+                                <td>{payout_detail}</td>
+                                <td>{payout_value}$</td>
+                                <td>{payout_date.split("T")[0]}</td>
+                            </tr>
+                        ))
+                    }
 
                     </tbody>
                 </table>

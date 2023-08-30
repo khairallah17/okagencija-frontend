@@ -4,7 +4,7 @@ import toast, { Toaster } from 'react-hot-toast'
 
 const UserInfo = () => {
   
-  const { handleChange } = useFormContext()
+  const { handleChange,data } = useFormContext()
 
   return (
     <div className="userInput-info flex flex-col gap-5">

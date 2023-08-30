@@ -1,5 +1,7 @@
-import { createContext, useState, useEffect } from "react";
-import jwtDecode from "jwt-decode";
+import { createContext, useState } from "react";
+import toast from "react-hot-toast";
+import axios from "axios";
+import useUserContext from "../Hooks/useUserContext";
 
 const FormContext = createContext({})
 
@@ -10,10 +12,7 @@ export const FormProvider = ({ children }) => {
         1: 'User Info'
     }
 
-    const [token, setToken] = useState("")
-    const [username, setUsername] = useState("")
-    const [email, setEmail] = useState("")
-    const [isAdmin, setIsAdmin] = useState(false)
+    const { clientId } = useUserContext()
 
     const [page, setPage] = useState(0)
 
@@ -29,6 +28,32 @@ export const FormProvider = ({ children }) => {
         phoneNumber: ""
     })
 
+    const registerRefferal = async () => {
+        
+        if (data.confPassword != data.password)
+            return toast.error("password does not match!")
+
+        else{
+
+            const body = {
+                sponsorUsername: data.sponsorUsername,
+                sponsorFullname: data.sponsorFullName,
+                clientId: clientId,
+            }
+
+            try {
+
+                const response = await axios.post("http://localhost:3000/api/v1/client/refferals", body) 
+                toast.success("refferal registred successfully !")
+
+            } catch (err) {
+                console.log(err.message)
+            }
+
+        }
+
+    }
+
     const handleChange = e => {
         const type = e.target.type
 
@@ -42,12 +67,8 @@ export const FormProvider = ({ children }) => {
         }))
     }
 
-    const decodeToken = () => {
-        console.log(jwtDecode(token).username)
-    }
-
     return (
-        <FormContext.Provider value={{ title, page, setPage, data, setData, handleChange, success, setSuccess, token, setToken, decodeToken }}>
+        <FormContext.Provider value={{ title, page, setPage, data, setData, handleChange, success, setSuccess, registerRefferal }}>
             { children }
         </FormContext.Provider>
     )
